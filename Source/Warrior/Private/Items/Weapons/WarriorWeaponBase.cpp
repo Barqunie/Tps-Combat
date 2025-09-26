@@ -3,6 +3,7 @@
 
 #include "Items/Weapons/WarriorWeaponBase.h"
 #include "Components/BoxComponent.h"	
+#include "WarriorDebugHelper.h"
 
 // Sets default values
 AWarriorWeaponBase::AWarriorWeaponBase()
@@ -17,10 +18,44 @@ AWarriorWeaponBase::AWarriorWeaponBase()
 	WeaponCollisionBox->SetupAttachment(GetRootComponent());
 	WeaponCollisionBox->SetBoxExtent(FVector(20.f));
 	WeaponCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponCollisionBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnCollisionBoxBeginOverlap);
+	WeaponCollisionBox->OnComponentEndOverlap.AddUniqueDynamic(this, &ThisClass::OnCollisionBoxEndOverlap);
 
 
 
 }
+
+void AWarriorWeaponBase::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	APawn* WeaponOwningPawn =	GetInstigator<APawn>();
+	checkf(WeaponOwningPawn, TEXT("Weapon %s has no valid instigator pawn"), *GetName());
+
+	if(APawn* HitPawn = Cast<APawn>(OtherActor))
+	{
+		if (WeaponOwningPawn != HitPawn)
+		{
+			OnWeaponHitTarget.ExecuteIfBound(OtherActor);
+		}
+		//To do Iplemet hit check for enemy
+	}
+}
+
+void AWarriorWeaponBase::OnCollisionBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	APawn* WeaponOwningPawn = GetInstigator<APawn>();
+	checkf(WeaponOwningPawn, TEXT("Weapon %s has no valid instigator pawn"), *GetName());
+
+	if (APawn* HitPawn = Cast<APawn>(OtherActor))
+	{
+		if (WeaponOwningPawn != HitPawn)
+		{
+			OnWeaponPulledFromTarget.ExecuteIfBound(OtherActor);
+		}
+		//To do Iplemet hit check for enemy
+	}
+}
+
+
 
 
 

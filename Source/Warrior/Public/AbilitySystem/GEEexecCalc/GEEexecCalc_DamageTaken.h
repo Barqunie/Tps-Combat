@@ -14,4 +14,9 @@ class WARRIOR_API UGEEexecCalc_DamageTaken : public UGameplayEffectExecutionCalc
 {
 	GENERATED_BODY()
 	
+public:
+	UGEEexecCalc_DamageTaken();
+
+	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput)const override;
+
 };
